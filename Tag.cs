@@ -146,7 +146,7 @@ namespace NBT
 			return InsertList(Count, listType);
 		}
 		
-		/// <summary>Add a new TagCompound to the TagList.</summary>
+		/// <summary>Adds a new TagCompound to the TagList.</summary>
 		/// <returns>The newly created TagList.</returns>
 		/// <exception cref="NotSupportedException">If this isn't a TagList.</exception>
 		/// <exception cref="ArgumentException">If ListType isn't TagCompound.</exception>
@@ -335,14 +335,14 @@ namespace NBT
 		
 		/// <summary>Loads a TagCompound from a file.</summary>
 		/// <param name="path">The file to be loaded from.</param>
-		/// <exception cref="FormatException">Invalid TagType or TagCompound expected.</exception>
+		/// <exception cref="FormatException">If root TagType isn't TagCompound.</exception>
 		public static Tag Load(string path)
 		{
 			using (FileStream fs = File.OpenRead(path)) return Load(fs);
 		}
 		/// <summary>Loads a TagCompound from a stream.</summary>
 		/// <param name="path">The stream to be loaded from.</param>
-		/// <exception cref="FormatException">Invalid TagType or TagCompound expected.</exception>
+		/// <exception cref="FormatException">If root TagType isn't TagCompound.</exception>
 		public static Tag Load(Stream stream)
 		{
 			using (GZipStream gs = new GZipStream(stream, CompressionMode.Decompress)) {

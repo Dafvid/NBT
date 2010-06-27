@@ -100,7 +100,7 @@ namespace NBT
 		/// <exception cref="NotSupportedException">If this isn't a TagList or TagCompound.</exception>
 		public void Clear()
 		{
-			foreach (Tag tag in this) tag.Remove();
+			foreach (Tag tag in new List<Tag>(this)) tag.Remove();
 		}
 		#endregion
 		
@@ -179,7 +179,7 @@ namespace NBT
 		{
 			if (!(this is TagList)) throw new NotSupportedException();
 			if (tag == null) throw new ArgumentNullException("tag");
-			return InsertPure(index, tag.Clone(this, null));
+			return InsertPure(index, tag.Clone(this));
 		}
 		
 		/// <summary>Creates a new TagList and inserts it into the TagList at the specific index.</summary>
@@ -190,7 +190,7 @@ namespace NBT
 		/// <exception cref="ArgumentException">If ListType isn't TagList.</exception>
 		public Tag InsertList(int index, TagType listType)
 		{
-			return InsertPure(index, new TagList(listType));
+			return InsertPure(index, new TagList(this, null, listType));
 		}
 		
 		/// <summary>Creates a new TagCompound and inserts it into the TagList at the specific index.</summary>
@@ -200,7 +200,7 @@ namespace NBT
 		/// <exception cref="ArgumentException">If ListType isn't TagCompound.</exception>
 		public Tag InsertCompound(int index)
 		{
-			return InsertPure(index, new TagCompound());
+			return InsertPure(index, new TagCompound(this, null));
 		}
 		#endregion
 		
@@ -348,7 +348,7 @@ namespace NBT
 			using (GZipStream gs = new GZipStream(stream, CompressionMode.Decompress)) {
 				Tag root = ReadNamedTag(gs);
 				if (root == null) throw new FormatException("Invalid TagType");
-				if (root.type != TagType.Compound) throw new FormatException("TagCompound expected.");
+				if (root.type != TagType.Compound) throw new FormatException("TagCompound expected");
 				return root;
 			}
 		}
@@ -377,14 +377,19 @@ namespace NBT
 					if (listType == TagType.Invalid) throw new FormatException("Invalid TagType");
 					int count = ReadInt(stream);
 					Tag list = new TagList(listType);
-					for (int i = 0; i < count; ++i)
-						list.InsertPure(i, ReadTag(stream, listType));
-					return list;
+					for (int i = 0; i < count; ++i) {
+						Tag tag = ReadTag(stream, listType);
+						tag.parent = list;
+						list.InsertPure(i, tag);
+					} return list;
 				case TagType.Compound:
 					Tag compound = new TagCompound();
-					Tag tag;
-					while ((tag = ReadNamedTag(stream)) != null)
+					while (true) {
+						Tag tag = ReadNamedTag(stream);
+						if (tag == null) break;
+						tag.parent = compound;
 						compound.AddPure(tag.name, tag);
+					}
 					return compound;
 				default:
 					throw new DivideByZeroException("Scheiß Wetter!");

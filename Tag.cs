@@ -364,6 +364,7 @@ namespace NBT
 		static Tag ReadTag(Stream stream, TagType type)
 		{
 			switch (type) {
+				case TagType.Invalid: throw new FormatException("Invalid TagType");
 				case TagType.Byte: return new Tag(ReadByte(stream));
 				case TagType.Short: return new Tag(ReadShort(stream));
 				case TagType.Int: return new Tag(ReadInt(stream));
@@ -391,8 +392,7 @@ namespace NBT
 						compound.AddPure(tag.name, tag);
 					}
 					return compound;
-				default:
-					throw new DivideByZeroException("Scheiß Wetter!");
+				default: throw new DivideByZeroException("Scheiß Wetter!");
 			}
 		}
 		#endregion
